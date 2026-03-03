@@ -1,0 +1,44 @@
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras import layers, models
+
+# Dataset laden
+X = np.load("X.npy")
+y = np.load("y.npy")
+
+# Anzahl Klassen bestimmen
+num_classes = len(np.unique(y))
+
+# Labels one-hot encoden
+y = tf.keras.utils.to_categorical(y, num_classes)
+
+# Modell bauen (CNN)
+model = models.Sequential([
+    layers.Conv2D(32, (3,3), activation='relu', input_shape=(32,32,1)),
+    layers.MaxPooling2D((2,2)),
+
+    layers.Conv2D(64, (3,3), activation='relu'),
+    layers.MaxPooling2D((2,2)),
+
+    layers.Flatten(),
+
+    layers.Dense(128, activation='relu'),
+    layers.Dropout(0.5),
+
+    layers.Dense(num_classes, activation='softmax')
+])
+
+# Modell kompilieren
+model.compile(
+    optimizer='adam',
+    loss='categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# Training
+model.fit(X, y, epochs=40, batch_size=32, validation_split=0.1)
+
+# Modell speichern
+model.save("schrift_model.h5")
+
+print("Training fertig! Modell gespeichert.")
